@@ -1,7 +1,7 @@
 ---
-title: 'Blog Post number 4'
-date: 2015-08-14
-permalink: /posts/2012/08/blog-post-4/
+title: 'Lie for public benefit'
+date: 2026-06-11
+permalink: /posts/2026/06/11/lying
 tags:
   - cool posts
   - category1
