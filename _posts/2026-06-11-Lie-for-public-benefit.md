@@ -9,7 +9,8 @@ tags:
 ---
 
 
-* Introduction
+Introduction
+===
 
 Imagine that you a college administrator and you earnestly want to know about the drug use of the student population. A very practical research question is how should you solict responses? This is a tricky problem because students are incentivized to lie. There are real consequences to being identified as saying yes. Even if the survey is a google form that is supposed to be anynomous, many students will under-report their drug use. 
 
