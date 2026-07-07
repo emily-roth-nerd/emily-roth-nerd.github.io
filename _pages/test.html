@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randomized Response Technique — Interactive Demo</title>
+    <style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f7fa;
+        color: #222;
+    }
+    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    h2 { color: #34495e; margin-top: 30px; font-size: 1.2em; }
+    .card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .control {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 4px solid #3498db;
+    }
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 0.9em;
+        color: #555;
+    }
+    input[type="range"] {
+        width: 100%;
+        margin: 5px 0;
+    }
+    .value-display {
+        float: right;
+        color: #3498db;
+        font-weight: 600;
+    }
+    button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 14px 24px;
+        border-radius: 6px;
+        font-size: 1.1em;
+        cursor: pointer;
+        margin-top: 15px;
+        width: 100%;
+        font-weight: 600;
+    }
+    button:hover { background: #2980b9; }
+    button:active { transform: translateY(1px); }
+    .run-info {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #666;
+        font-style: italic;
+    }
+    .results {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .result-box {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    .result-box h3 {
+        margin: 0 0 10px;
+        font-size: 1em;
+        color: #555;
+    }
+    .result-value {
+        font-size: 2em;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    .result-label {
+        font-size: 0.85em;
+        color: #777;
+        margin-top: 5px;
+    }
+    .stat-row {
+        display: flex;
+        justify-content: space-around;
+        background: #dfe6e9;
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: 8px;
+    }
+    .stat-item {
+        text-align: center;
+    }
+    .stat-value {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1em;
+    }
+    .stat-label {
+        font-size: 0.75em;
+        color: #555;
+    }
+    .method-card {
+        background: white;
+        border-radius: 8p x;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .method-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    .method-desc {
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.5;
+    }
+    .formula {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.9em;
+        margin: 8px 0;
+        display: inline-block;
+    }
+    .note {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px 15px;
+        border-radius: 4px;
+        margin-top: 20px;
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+    .note strong { color: #856404; }
+    @media (max-width: 600px) {
+        .controls { grid-template-columns: 1fr; }
+        .results { grid-template-columns: 1fr; }
+    }
+    </style>
+    </head>
+    <body>
+    <h1>🎲 Randomized Response Technique</h1>
+    <p style="color:#666; margin-top:-10px;">
+        An interactive demonstration of how randomized response protects respondent
+        privacy while still revealing true population statistics.
+    </p>
+
+    <div class="card">
+        <h2>⚙️ Simulation Parameters</h2>
+        <div class="controls">
+        <div class="control">
+            <label>
+            Population Sizes to Test
+            </label>
+            <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                Testing sequence: 1K, 5K, 10K, 25K, 50K, 100K, 200K
+            </div>
+        </div>
+
+        <div class="control">
+            <label>
+            True Proportion (π) — % with sensitive trait
+            <span class="value-display" id="piVal">28%</span>
+            </label>
+            <input type="range" id="pi" min="1" max="99" step="1" value="28">
+        </div>
+
+        <div class="control">
+            <label>
+            Warner: Coin P(Heads → forced YES)
+            <span class="value-display" id="pHeadsVal">0.50</span>
+            </label>
+            <input type="range" id="pHeads" min="10" max="90" step="5" value="50">
+        </div>
+
+        <div class="control">
+            <label>
+            Unrelated Q: P(Sensitive Question)
+            <span class="value-display" id="pSensVal">0.50</span>
+            </label>
+            <input type="range" id="pSens" min="10" max="90" step="5" value="50">
+        </div>
+
+        <div class="control">
+            <label>
+            Unrelated Q: True Answer Rate (π_u)
+            <span class="value-display" id="unrelVal">30%</span>
+            </label>
+            <input type="range" id="unrel" min="5" max="80" step="5" value="30">
+        </div>
+
+        <div class="control">
+            <label>
+            Number of Runs
+            <span class="value-display" id="runsVal">20</span>
+            </label>
+            <input type="range" id="runs" min="1" max="200" step="1" value="20">
+        </div>
+        </div>
+
+        <button id="run-button" onclick="runSimulation()">▶ Run Simulation</button>
+        <div class="run-info" id="runInfo">Click "Run Simulation" to start a new batch of experiments.</div>
+    </div>
+
+    <div class="card">
+        <h2>📊 Results (Aggregated Across All Runs)</h2>
+        <canvas id="plot" width="800" height="400" style="max-width: 100%; background: white; border-radius: 6px; margin-bottom: 15px;"></canvas>
+        <div class="results">
+        <div class="result-box">
+            <h3>True Proportion (Ground Truth)</h3>
+            <div class="result-value" id="trueProp">—</div>
+            <div class="result-label">hidden from interviewer</div>
+        </div>
+        <div class="result-box">
+            <h3>Warner (1965)</h3>
+            <div class="result-value" id="warnerMean">—</div>
+            <div class="stat-row">
+            <div class="stat-item">
+                <div class="stat-value" id="warnerVar">—</div>
+                <div class="stat-label">Variance</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="warnerStd">—</div>
+                <div class="stat-label">Std Dev</div>
+            </div>
+            </div>
+            <div class="result-label" id="warnerCv">CV: —</div>
+        </div>
+        <div class="result-box">
+            <h3>Unrelated Q</h3>
+            <div class="result-value" id="unrelMean">—</div>
+            <div class="stat-row">
+            <div class="stat-item">
+                <div class="stat-value" id="unrelVar">—</div>
+                <div class="stat-label">Variance</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="unrelStd">—</div>
+                <div class="stat-label">Std Dev</div>
+            </div>
+            </div>
+            <div class="result-label" id="unrelCv">CV: —</div>
+        </div>
+        <div class="result-box">
+            <h3>Single-Run Diagnostics</h3>
+            <div class="result-value" id="singleWarner" style="font-size:1.4em">—</div>
+            <div class="result-label" id="warnerBias">raw change: —</div>
+            <div class="result-label" id="warnerPct">% difference: —</div>
+            <div class="result-value" id="singleUnrel" style="font-size:1.4em">—</div>
+            <div class="result-label" id="unrelBias">raw change: —</div>
+            <div class="result-label" id="unrelPct">% difference: —</div>
+        </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📖 How the Methods Work</h2>
+
+        <div class="method-card">
+        <div class="method-title">1. Warner (1965) — Randomized Response</div>
+        <div class="method-desc">
+            Each respondent flips a secret coin:
+            <ul>
+            <li><strong>Heads</strong> → answer YES regardless of the truth (forced "driver")</li>
+            <li><strong>Tails</strong> → answer the <em>sensitive</em> question truthfully</li>
+            </ul>
+            The interviewer only sees a YES/NO — never which branch was taken.
+            <br><br>
+            <span class="formula">π̂ = (p_obs − p) / (1 − p)</span>
+        </div>
+        </div>
+
+        <div class="method-card">
+        <div class="method-title">2. Unrelated-Question Design (Horvitz et al., 1967)</div>
+        <div class="method-desc">
+            Each respondent flips a secret coin:
+            <ul>
+            <li><strong>Heads</strong> → answer the <em>sensitive</em> question truthfully</li>
+            <li><strong>Tails</strong> → answer an <em>unrelated</em> question (e.g., "Were you born in October?") whose true answer rate π<sub>u</sub> is publicly known</li>
+            </ul>
+            <span class="formula">π̂ = (p_obs − (1 − p)·π<sub>u</sub>) / p</span>
+        </div>
+        </div>
+
+        <div class="note">
+        <strong>🔒 Privacy Property:</strong> Because each response is randomized, the interviewer
+        cannot determine whether a "YES" came from a forced branch or from the respondent
+        actually possessing the sensitive trait. This gives every respondent
+        <strong>plausible deniability</strong>.
+        </div>
+    </div>
+
+    <script>
+
+    // document.getElementById("run-button").addEventListener("click", displayDate); 
+    // Seeded pseudo-random number generator (Mulberry32)
+    function mulberry32(seed) {
+    return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+    }
+
+    function generatePopulation(n, trueProp, seed) {
+    const rng = mulberry32(seed);
+    const pop = [];
+    for (let i = 0; i < n; i++) {
+        pop.push({ id: i, hasTrait: rng() < trueProp ? 1 : 0 });
+    }
+    return pop;
+    }
+
+    function respondWarner(ind, pHeads, rng) {
+    const isDriver = rng() < pHeads;
+    return isDriver ? 1 : ind.hasTrait;
+    }
+
+    function respondUnrelated(ind, pSens, unrelPrev, rng) {
+    const answerSens = rng() < pSens;
+    if (answerSens) return ind.hasTrait;
+    return rng() < unrelPrev ? 1 : 0;
+    }
+
+    function estimateWarner(rr, pHeads) {
+    const pObs = rr.reduce((a, b) => a + b, 0) / rr.length;
+    return Math.max(0, Math.min(1, (pObs - pHeads) / (1 - pHeads)));
+    }
+
+    function estimateUnrelated(rr, pSens, unrelPrev) {
+    const pObs = rr.reduce((a, b) => a + b, 0) / rr.length;
+    return Math.max(0, Math.min(1, (pObs - (1 - pSens) * unrelPrev) / pSens));
+    }
+
+    function computeStats(arr) {
+    const n = arr.length;
+    const mean = arr.reduce((a, b) => a + b, 0) / n;
+    const variance = arr.reduce((sum, x) => sum + (x - mean) ** 2, 0) / n;
+    const std = Math.sqrt(variance);
+    const cv = mean !== 0 ? std / mean : 0;
+    return { mean, variance, std, cv };
+    }
+
+    function formatNum(val, decimals = 4) {
+    return val.toFixed(decimals);
+    }
+
+    function formatPct(val) {
+    const sign = val >= 0 ? '+' : '';
+    return sign + (val * 100).toFixed(2) + '%';
+    }
+
+function drawPlot(populationSizes, warnerData, unrelData, trueProp) {
+  const canvas = document.getElementById('plot');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  // Clear canvas
+  ctx.fillStyle = '#f8f9fa';
+  ctx.fillRect(0, 0, width, height);
+  
+  // Margins
+  const margin = { top: 40, right: 60, bottom: 60, left: 70 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  
+  // Find data ranges
+  const allMeans = [...warnerData.map(d => d.mean), ...unrelData.map(d => d.mean)];
+  const allErrors = [...warnerData.map(d => d.std), ...unrelData.map(d => d.std)];
+  const yMin = Math.min(...allMeans) - Math.max(...allErrors) * 1.5;
+  const yMax = Math.max(...allMeans) + Math.max(...allErrors) * 1.5;
+  const xMin = Math.min(...populationSizes);
+  const xMax = Math.max(...populationSizes);
+  
+  // Scale functions
+  const scaleX = (x) => margin.left + ((Math.log10(x) - Math.log10(xMin)) / (Math.log10(xMax) - Math.log10(xMin))) * plotWidth;
+  const scaleY = (y) => margin.top + plotHeight - ((y - yMin) / (yMax - yMin)) * plotHeight;
+  
+  // Draw grid
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = margin.top + (plotHeight / 5) * i;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(width - margin.right, y);
+    ctx.stroke();
+  }
+  
+  // Draw axes
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, height - margin.bottom);
+  ctx.lineTo(width - margin.right, height - margin.bottom);
+  ctx.stroke();
+  
+  // Draw true proportion line
+  ctx.strokeStyle = '#27ae60';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(margin.left, scaleY(trueProp));
+  ctx.lineTo(width - margin.right, scaleY(trueProp));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Draw Warner data with error bars
+  ctx.strokeStyle = '#3498db';
+  ctx.fillStyle = '#3498db';
+  ctx.lineWidth = 2;
+  warnerData.forEach((d, i) => {
+    const x = scaleX(populationSizes[i]);
+    const y = scaleY(d.mean);
+    const err = scaleY(d.mean - d.std) - scaleY(d.mean + d.std);
+    
+    // Error bar
+    ctx.beginPath();
+    ctx.moveTo(x, scaleY(d.mean - d.std));
+    ctx.lineTo(x, scaleY(d.mean + d.std));
+    ctx.stroke();
+    
+    // Caps
+    ctx.beginPath();
+    ctx.moveTo(x - 5, scaleY(d.mean - d.std));
+    ctx.lineTo(x + 5, scaleY(d.mean - d.std));
+    ctx.moveTo(x - 5, scaleY(d.mean + d.std));
+    ctx.lineTo(x + 5, scaleY(d.mean + d.std));
+    ctx.stroke();
+    
+    // Point
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  
+  // Draw Unrelated Q data with error bars
+  ctx.strokeStyle = '#e74c3c';
+  ctx.fillStyle = '#e74c3c';
+  unrelData.forEach((d, i) => {
+    const x = scaleX(populationSizes[i]);
+    const y = scaleY(d.mean);
+    const err = scaleY(d.mean - d.std) - scaleY(d.mean + d.std);
+    
+    // Error bar
+    ctx.beginPath();
+    ctx.moveTo(x, scaleY(d.mean - d.std));
+    ctx.lineTo(x, scaleY(d.mean + d.std));
+    ctx.stroke();
+    
+    // Caps
+    ctx.beginPath();
+    ctx.moveTo(x - 5, scaleY(d.mean - d.std));
+    ctx.lineTo(x + 5, scaleY(d.mean - d.std));
+    ctx.moveTo(x - 5, scaleY(d.mean + d.std));
+    ctx.lineTo(x + 5, scaleY(d.mean + d.std));
+    ctx.stroke();
+    
+    // Point (triangle)
+    ctx.beginPath();
+    ctx.moveTo(x, y - 5);
+    ctx.lineTo(x + 5, y + 3);
+    ctx.lineTo(x - 5, y + 3);
+    ctx.closePath();
+    ctx.fill();
+  });
+  
+  // Draw axes labels
+  ctx.fillStyle = '#333';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Population Size (N)', width / 2, height - 10);
+  
+  ctx.save();
+  ctx.translate(15, height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Estimated Proportion', 0, 0);
+  ctx.restore();
+  
+  // X-axis tick labels
+  ctx.textAlign = 'center';
+  populationSizes.forEach(size => {
+    const x = scaleX(size);
+    ctx.fillText(size >= 1000 ? (size / 1000) + 'K' : size, x, height - margin.bottom + 20);
+  });
+  
+  // Y-axis tick labels
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 5; i++) {
+    const val = yMin + ((yMax - yMin) / 5) * (5 - i);
+    const y = margin.top + (plotHeight / 5) * i;
+    ctx.fillText(val.toFixed(3), margin.left - 10, y + 4);
+  }
+  
+  // Legend
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+  
+  // True proportion
+  ctx.strokeStyle = '#27ae60';
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(margin.left + 10, 20);
+  ctx.lineTo(margin.left + 40, 20);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText('True π = ' + trueProp.toFixed(3), margin.left + 50, 24);
+  
+  // Warner
+  ctx.fillStyle = '#3498db';
+  ctx.beginPath();
+  ctx.arc(margin.left + 10, 40, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillText('Warner (1965)', margin.left + 50, 44);
+  
+  // Unrelated Q
+  ctx.fillStyle = '#e74c3c';
+  ctx.beginPath();
+  ctx.moveTo(margin.left + 10, 58);
+  ctx.lineTo(margin.left + 14, 62);
+  ctx.lineTo(margin.left + 6, 62);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillText('Unrelated Q', margin.left + 50, 62);
+}
+
+function runSimulation() {
+  const btn = document.querySelector('button');
+  btn.textContent = 'Running...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const pi = parseInt(document.getElementById('pi').value) / 100;
+    const pHeads = parseInt(document.getElementById('pHeads').value) / 100;
+    const pSens = parseInt(document.getElementById('pSens').value) / 100;
+    const unrelPrev = parseInt(document.getElementById('unrel').value) / 100;
+    const numRuns = parseInt(document.getElementById('runs').value);
+
+    const baseSeed = Math.floor(Math.random() * 999999) + 1;
+
+    document.getElementById('runInfo').textContent = 
+      `Testing 7 population sizes × ${numRuns} runs each  |  Base seed: ${baseSeed}`;
+
+    // Define sequence of population sizes to test
+    const populationSizes = [1000, 5000, 10000, 25000, 50000, 100000, 200000];
+    
+    const warnerResults = [];
+    const unrelResults = [];
+
+    // Test each population size
+    populationSizes.forEach((N, idx) => {
+      const warnerEstimates = [];
+      const unrelEstimates = [];
+
+      for (let run = 0; run < numRuns; run++) {
+        const seed = baseSeed + idx * 10000 + run * 1000;
+        const rngW = mulberry32(seed);
+        const rngU = mulberry32(seed + 500);
+        const rngPop = mulberry32(seed + 1000);
+
+        const pop = generatePopulation(N, pi, seed + 1000);
+        const rrWarner = pop.map(ind => respondWarner(ind, pHeads, rngW));
+        const rrUnrel = pop.map(ind => respondUnrelated(ind, pSens, unrelPrev, rngU));
+
+        warnerEstimates.push(estimateWarner(rrWarner, pHeads));
+        unrelEstimates.push(estimateUnrelated(rrUnrel, pSens, unrelPrev));
+      }
+
+      const warnerStats = computeStats(warnerEstimates);
+      const unrelStats = computeStats(unrelEstimates);
+
+      warnerResults.push(warnerStats);
+      unrelResults.push(unrelStats);
+    });
+
+    // Use the largest population size for the detailed statistics display
+    const N = populationSizes[populationSizes.length - 1];
+    const trueProp = generatePopulation(N, pi, baseSeed + 1000)
+      .reduce((a, b) => a + b.hasTrait, 0) / N;
+
+    const warnerStats = warnerResults[warnerResults.length - 1];
+    const unrelStats = unrelResults[unrelResults.length - 1];
+
+    document.getElementById('trueProp').textContent = formatNum(trueProp);
+
+    document.getElementById('warnerMean').textContent = formatNum(warnerStats.mean);
+    document.getElementById('warnerVar').textContent = formatNum(warnerStats.variance, 6);
+    document.getElementById('warnerStd').textContent = formatNum(warnerStats.std, 4);
+    document.getElementById('warnerCv').textContent = 'CV: ' + (warnerStats.cv * 100).toFixed(2) + '%';
+
+    document.getElementById('unrelMean').textContent = formatNum(unrelStats.mean);
+    document.getElementById('unrelVar').textContent = formatNum(unrelStats.variance, 6);
+    document.getElementById('unrelStd').textContent = formatNum(unrelStats.std, 4);
+    document.getElementById('unrelCv').textContent = 'CV: ' + (unrelStats.cv * 100).toFixed(2) + '%';
+
+    const lastWarner = warnerResults[warnerResults.length - 1].mean;
+    const lastUnrel = unrelResults[unrelResults.length - 1].mean;
+
+    document.getElementById('singleWarner').textContent = formatNum(lastWarner);
+    document.getElementById('warnerBias').textContent = 'raw change: ' + formatNum(lastWarner - trueProp);
+    document.getElementById('warnerPct').textContent = '% difference: ' + formatPct((lastWarner - trueProp) / trueProp);
+
+    document.getElementById('singleUnrel').textContent = formatNum(lastUnrel);
+    document.getElementById('unrelBias').textContent = 'raw change: ' + formatNum(lastUnrel - trueProp);
+    document.getElementById('unrelPct').textContent = '% difference: ' + formatPct((lastUnrel - trueProp) / trueProp);
+
+    // Draw the plot
+    drawPlot(populationSizes, warnerResults, unrelResults, trueProp);
+
+    // Restore button
+    btn.textContent = '▶ Run Simulation';
+    btn.disabled = false;
+  }, 50);
+}
+
+
+    // Update value displays when sliders move (but do NOT auto-run)
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+    input.addEventListener('input', () => {
+        document.getElementById('piVal').textContent = 
+        document.getElementById('pi').value + '%';
+        document.getElementById('pHeadsVal').textContent = 
+        (parseInt(document.getElementById('pHeads').value) / 100).toFixed(2);
+        document.getElementById('pSensVal').textContent = 
+        (parseInt(document.getElementById('pSens').value) / 100).toFixed(2);
+        document.getElementById('unrelVal').textContent = 
+        document.getElementById('unrel').value + '%';
+        document.getElementById('runsVal').textContent = 
+        document.getElementById('runs').value;
+    });
+    });
+    </script>
+
+    </body>
+    </html>
